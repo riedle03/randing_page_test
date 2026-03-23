@@ -1,0 +1,25 @@
+<svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(520 360) rotate(35) scale(520 340)">
+      <stop offset="0%" stop-color="#7AA8FF" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#A98BFF" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1060 420) rotate(12) scale(430 290)">
+      <stop offset="0%" stop-color="#FF9EDB" stop-opacity="0.48"/>
+      <stop offset="60%" stop-color="#FFD08A" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(840 720) rotate(-8) scale(740 420)">
+      <stop offset="0%" stop-color="#BFD2FF" stop-opacity="0.26"/>
+      <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur1" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1200" fill="#F7F8FB"/>
+  <ellipse cx="520" cy="360" rx="520" ry="340" fill="url(#g1)" filter="url(#blur1)"/>
+  <ellipse cx="1060" cy="420" rx="430" ry="290" fill="url(#g2)" filter="url(#blur1)"/>
+  <ellipse cx="840" cy="720" rx="740" ry="420" fill="url(#g3)" filter="url(#blur1)"/>
+</svg>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A new kind of credit card.</title>
+  <style>
+    :root {
+      --text-primary: #070707;
+      --card-border: #E5E0DA;
+      --ui-bg: rgba(255, 255, 255, 0.88);
+      --ui-border: rgba(7, 7, 7, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      background: #FAF8F5;
+      font-family: Arial, sans-serif;
+    }
+
+    /* ── 스크롤 스테이지 ── */
+    .stage {
+      height: 4000px;
+      position: relative;
+    }
+
+    .page-link {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 40;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: var(--ui-bg);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      border: 1px solid var(--ui-border);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 36px rgba(7, 7, 7, 0.08);
+    }
+
+    .page-link:hover {
+      transform: translateY(-1px);
+    }
+
+    /* ── 핵심: 모핑 그래디언트 ──
+       화면 전체를 덮다가 스크롤에 따라 카드 형태로 축소됨
+       clip-path: inset()으로 사각형 영역을 점점 줄여나감 */
+    .gradient-morph {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.8s ease-out;
+      /* JS가 clip-path를 제어 */
+    }
+
+    .gradient-morph.visible {
+      opacity: 1;
+    }
+
+    .gradient-morph img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    /* ── 히어로 타이틀 ── */
+    .intro-title {
+      position: fixed;
+      z-index: 20;
+      left: 0;
+      right: 0;
+      top: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(calc(-50% - 124px + 12px));
+      pointer-events: none;
+    }
+
+    .intro-title.visible {
+      opacity: 1;
+      transform: translateY(calc(-50% - 124px));
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .intro-title-text {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, "Helvetica Neue", sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+      letter-spacing: -0.02em;
+      max-width: 80vw;
+    }
+
+    /* ── 카드 브랜딩 오버레이 (모핑 완료 후 fade-in) ── */
+    .card-branding-overlay {
+      position: fixed;
+      z-index: 10;
+      width: 480px;
+      height: 300px;
+      left: 0;
+      right: 0;
+      bottom: 47px;
+      margin: 0 auto;
+      opacity: 0;
+      pointer-events: none;
+      /* JS가 opacity 제어 */
+    }
+
+    .card-branding-overlay img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* ── 메인 헤딩 ── */
+    .card-title-end {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: -145px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .heading {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      font-size: 63px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.2;
+      max-width: 90vw;
+    }
+
+    /* ── iPhone 목업 ── */
+    .iphone-wrapper {
+      position: fixed;
+      z-index: 3;
+      width: 600px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: 0 auto;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .iphone-wrapper img {
+      width: 100%;
+      display: block;
+    }
+
+    /* ── 반응형 ── */
+    @media (max-width: 767px) {
+      .page-link {
+        top: 12px;
+        right: 12px;
+        padding: 10px 14px;
+        font-size: 13px;
+      }
+      .intro-title-text { font-size: 28px; }
+      .heading { font-size: 36px; }
+      .card-branding-overlay { width: 320px; height: 200px; }
+      .iphone-wrapper { width: 90vw; }
+    }
+
+    @media (max-width: 479px) {
+      .heading { font-size: 26px; }
+      .card-branding-overlay { width: 280px; height: 175px; bottom: 30px; }
+      .iphone-wrapper { width: 100vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <a class="page-link" href="./HOW_WE_BUILT_THIS.html">How We Built This</a>
+
+  <div class="stage" id="stage">
+    <!-- 모핑 그래디언트: 화면 전체 → 카드 형태로 축소 -->
+    <div class="gradient-morph" id="gradientMorph">
+      <img src="gradient-bg.svg" alt="">
+    </div>
+
+    <!-- 히어로 타이틀: 로드 시 등장, 카드 모핑 시작과 함께 사라짐 -->
+    <div class="intro-title" id="introTitle">
+      <span class="intro-title-text">DH's Fabulous Site</span>
+    </div>
+
+    <!-- 카드 브랜딩: 모핑 완료 후 fade-in -->
+    <div class="card-branding-overlay" id="cardBranding">
+      <img src="card-branding.svg" alt="Credit Card">
+    </div>
+
+    <!-- 메인 헤딩 -->
+    <div class="card-title-end" id="cardTitle">
+      <h1 class="heading">A new kind of credit card.</h1>
+    </div>
+
+    <!-- iPhone 목업 -->
+    <div class="iphone-wrapper" id="iphoneWrapper">
+      <img src="iphone-p-1080.jpeg" alt="iPhone" id="iphoneImg">
+    </div>
+  </div>
+
+  <script>
+    const gradientMorph = document.getElementById('gradientMorph');
+    const introTitle    = document.getElementById('introTitle');
+    const cardBranding  = document.getElementById('cardBranding');
+    const cardTitle     = document.getElementById('cardTitle');
+    const iphoneWrapper = document.getElementById('iphoneWrapper');
+
+    // ── 유틸 ──
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    function lerp(a, b, t)      { return a + (b - a) * clamp(t, 0, 1); }
+    function easeOut(t)         { return 1 - Math.pow(1 - clamp(t, 0, 1), 3); }
+    function easeInOut(t)       { t = clamp(t, 0, 1); return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+
+    function getProgress(scrollY, startPct, endPct) {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      return clamp((scrollY - maxScroll * startPct) / (maxScroll * (endPct - startPct)), 0, 1);
+    }
+
+    // ── 카드 스펙 (반응형 대응) ──
+    function getCardSpec() {
+      const vw = window.innerWidth;
+      if (vw <= 479) return { w: 280, h: 175, bottom: 30 };
+      if (vw <= 767) return { w: 320, h: 200, bottom: 47 };
+      return { w: 480, h: 300, bottom: 47 };
+    }
+
+    // clip-path inset 계산: 화면 전체 → 카드 위치/크기로
+    function computeClipPath(progress) {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const card = getCardSpec();
+
+      const cardLeft   = (vw - card.w) / 2;
+      const cardRight  = cardLeft;
+      const cardBottom = card.bottom;
+      const cardTop    = vh - card.h - card.bottom;
+
+      const t = easeOut(progress);
+
+      const top    = lerp(0, cardTop,    t);
+      const right  = lerp(0, cardRight,  t);
+      const bottom = lerp(0, cardBottom, t);
+      const left   = lerp(0, cardLeft,   t);
+      const radius = lerp(34, 12.874,    t);
+
+      return `inset(${top}px ${right}px ${bottom}px ${left}px round ${radius}px)`;
+    }
+
+
+    // ── 페이지 로드 진입 ──
+    window.addEventListener('load', () => {
+      // 그래디언트 전체 화면 fade-in
+      setTimeout(() => {
+        gradientMorph.classList.add('visible');
+        gradientMorph.style.clipPath = computeClipPath(0);
+      }, 80);
+
+      // 히어로 타이틀 slide-up
+      setTimeout(() => {
+        introTitle.classList.add('visible');
+      }, 200);
+    });
+
+    // ── 스크롤 애니메이션 ──
+    function onScroll() {
+      const scrollY = window.scrollY;
+
+      // ① 그래디언트 모핑: scroll 0~45%
+      //    화면 전체 → 카드 형태로 clip-path 축소
+      const morphP = getProgress(scrollY, 0, 0.45);
+      gradientMorph.style.clipPath = computeClipPath(morphP);
+
+      // ② 히어로 타이틀: scroll 0~20% 동안 fade-out
+      const introOut = getProgress(scrollY, 0, 0.20);
+      introTitle.style.opacity = (1 - easeOut(introOut)).toFixed(3);
+
+      // ③ 카드 브랜딩: scroll 45~58% 동안 fade-in
+      const brandP = getProgress(scrollY, 0.45, 0.58);
+      cardBranding.style.opacity = easeOut(brandP).toFixed(3);
+
+      // ④ 메인 헤딩: scroll 52~65%
+      const titleP = getProgress(scrollY, 0.52, 0.65);
+      cardTitle.style.opacity = easeOut(titleP).toFixed(3);
+      cardTitle.style.transform =
+        `translateY(${lerp(10, 0, easeOut(titleP)).toFixed(1)}px)`;
+
+      // ⑤ iPhone 등장: scroll 60~78%
+      const iphoneP = getProgress(scrollY, 0.60, 0.78);
+      iphoneWrapper.style.opacity   = easeOut(iphoneP).toFixed(3);
+      const iphoneY = lerp(100, 0, easeOut(iphoneP));
+      iphoneWrapper.style.transform = `translateY(${iphoneY.toFixed(1)}px)`;
+
+      // ⑥ 카드 → iPhone 진입: scroll 72~90%
+      //    clip-path inset 값을 계속 조정해 카드를 위로 이동 + 축소
+      //    transform 미사용 — clip-path 방식으로 통일
+      const enterP = getProgress(scrollY, 0.72, 0.90);
+      if (enterP > 0) {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const card = getCardSpec();
+
+        // 카드 완성 상태의 inset 기준값
+        const baseT  = vh - card.h - card.bottom;
+        const baseLR = (vw - card.w) / 2;
+        const baseB  = card.bottom;
+
+        // 목표: 60% 축소 + 위로 180px 이동
+        const targetW  = card.w * 0.60;
+        const targetH  = card.h * 0.60;
+        const targetB  = card.bottom + 180;          // 위로 이동
+        const targetT  = vh - targetH - targetB;
+        const targetLR = (vw - targetW) / 2;
+
+        const t   = easeInOut(enterP);
+        const top    = lerp(baseT,  targetT,  t);
+        const lr     = lerp(baseLR, targetLR, t);
+        const bottom = lerp(baseB,  targetB,  t);
+
+        gradientMorph.style.clipPath =
+          `inset(${top}px ${lr}px ${bottom}px ${lr}px round 12.874px)`;
+
+        // card-branding · 헤딩 fade-out
+        cardBranding.style.opacity = lerp(1, 0, easeOut(t)).toFixed(3);
+        cardTitle.style.opacity    = lerp(1, 0, easeOut(t)).toFixed(3);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    // 초기 실행
+    onScroll();
+  </script>
+
+</body>
+</html>
